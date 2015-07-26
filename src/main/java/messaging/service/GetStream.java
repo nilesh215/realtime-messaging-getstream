@@ -4,9 +4,17 @@ import client.StreamClientImpl;
 import io.getstream.client.StreamClient;
 import io.getstream.client.config.ClientConfiguration;
 import io.getstream.client.config.StreamRegion;
+import io.getstream.client.exception.StreamClientException;
+import io.getstream.client.model.feeds.Feed;
+import io.getstream.client.service.AggregatedActivityServiceImpl;
+import messaging.domain.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by Nilesh Bhosale
@@ -30,4 +38,28 @@ public class GetStream {
         streamClient = new StreamClientImpl(streamConfig, apiKey, apiSecret);
     }
 
+    public Message sendMessage(Message message) throws IOException, StreamClientException {
+        ArrayList ids=new ArrayList();
+        ids.add(String.valueOf(message.getToUser()));
+        message.setTo(ids);
+        message.setSentDate(new Date());
+        message.setActor(String.valueOf(message.getFromUser()));
+        message.setVerb(message.getFromUser() > message.getToUser() ?
+                "message" + message.getFromUser()+message.getToUser():
+                "message" + message.getToUser()+message.getFromUser());
+        return  postMessage(message);
+    }
+
+    /**
+     * post Messages to GetStream
+     * @return
+     * @throws IOException
+     * @throws StreamClientException
+     */
+    private Message postMessage(Message message) throws IOException, StreamClientException {
+        Feed feed = streamClient.newFeed("messages", String.valueOf(message.getFromUser()));
+        AggregatedActivityServiceImpl<Message> aggregatedActivityService =  feed.newAggregatedActivityService(Message.class);
+        message = aggregatedActivityService.addActivity(message);
+        return message;
+    }
 }
