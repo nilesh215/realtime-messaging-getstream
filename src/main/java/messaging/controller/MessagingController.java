@@ -34,15 +34,16 @@ public class MessagingController {
         return message;
     }
 
-    @RequestMapping(value = "/messages/{userId}", method = RequestMethod.POST)
-    public StreamResponse<AggregatedActivity<Message>> sendMessage(@RequestParam long userId) throws IOException, StreamClientException {
+    @RequestMapping(value = "/messages/{userId}", method = RequestMethod.GET)
+    public StreamResponse<AggregatedActivity<Message>> sendMessage(
+            @PathVariable("userId") long userId) throws IOException, StreamClientException {
         return getStream.getMessages(userId);
     }
 
-    @RequestMapping(value = "/conversation/{userId}/{conversationId}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/conversation/{userId}/{conversationId}", method = RequestMethod.GET)
     public AggregatedActivity<Message> getConversation(
-            @RequestParam long userId,
-            @RequestParam String conversationId) throws IOException, StreamClientException {
+            @PathVariable("userId") long userId,
+            @PathVariable("conversationId") String conversationId) throws IOException, StreamClientException {
         return getStream.getConversation(userId, conversationId);
     }
 

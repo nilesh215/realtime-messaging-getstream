@@ -1,6 +1,7 @@
 package messaging.domain;
 
 import io.getstream.client.model.activities.BaseActivity;
+import io.getstream.client.model.activities.SimpleActivity;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -12,12 +13,12 @@ import java.util.Date;
 @Entity
 @Table(name = "messages")
 @Data
-public class Message extends BaseActivity {
+public class Message extends SimpleActivity {
 
     @Column(name = "to_user")
-    private Long toUser;
+    private long toUser;
     @Column(name = "from_user")
-    private Long fromUser;
+    private long fromUser;
     @Column(name = "message")
     private String message;
     @Column(name = "sent_date")
@@ -25,7 +26,7 @@ public class Message extends BaseActivity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "message_id")
-    private String messageId;
+    private long messageId;
 
 
 }

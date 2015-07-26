@@ -1,11 +1,14 @@
 package messaging.service;
 
 import client.StreamClientImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getstream.client.StreamClient;
 import io.getstream.client.config.ClientConfiguration;
 import io.getstream.client.config.StreamRegion;
 import io.getstream.client.exception.StreamClientException;
 import io.getstream.client.model.activities.AggregatedActivity;
+import io.getstream.client.model.activities.BaseActivity;
+import io.getstream.client.model.activities.SimpleActivity;
 import io.getstream.client.model.beans.StreamResponse;
 import io.getstream.client.model.feeds.Feed;
 import io.getstream.client.service.AggregatedActivityServiceImpl;
@@ -36,7 +39,7 @@ public class GetStream {
     public GetStream(@Value("${getstream.key}") String apiKey,
                      @Value("${getstream.secret}") String apiSecret) {
         ClientConfiguration streamConfig = new ClientConfiguration();
-        streamConfig.setRegion(StreamRegion.AP_SOUTH_EAST);
+        streamConfig.setRegion(StreamRegion.AP_NORTH_EAST);
         streamClient = new StreamClientImpl(streamConfig, apiKey, apiSecret);
     }
 
@@ -49,14 +52,15 @@ public class GetStream {
      * @throws StreamClientException
      */
     public Message sendMessage(Message message) throws IOException, StreamClientException {
-        ArrayList ids = new ArrayList();
-        ids.add(String.valueOf(message.getToUser()));
+        ArrayList<String> ids = new ArrayList();
+        ids.add("messages:"+message.getToUser());
         message.setTo(ids);
         message.setSentDate(new Date());
         message.setActor(String.valueOf(message.getFromUser()));
-        message.setVerb(message.getFromUser() > message.getToUser() ?
-                "message" + message.getFromUser() + message.getToUser() :
-                "message" + message.getToUser() + message.getFromUser());
+        message.setVerb(message.getFromUser() < message.getToUser() ?
+                "message:" + message.getFromUser() + "," + message.getToUser() :
+                "message:" + message.getToUser() + "," + message.getFromUser());
+        message.setObject(message.getVerb());
         return postMessage(message);
     }
 
