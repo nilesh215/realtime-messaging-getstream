@@ -1,15 +1,14 @@
 package messaging.controller;
 
 import io.getstream.client.exception.StreamClientException;
+import io.getstream.client.model.activities.AggregatedActivity;
+import io.getstream.client.model.beans.StreamResponse;
 import messaging.dao.MessageDao;
 import messaging.dao.UserDao;
 import messaging.domain.Message;
 import messaging.service.GetStream;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
@@ -35,7 +34,19 @@ public class MessagingController {
         return message;
     }
 
+    @RequestMapping(value = "/messages/{userId}",method = RequestMethod.POST)
+    public StreamResponse<AggregatedActivity<Message>> sendMessage(@RequestParam long userId) throws IOException, StreamClientException {
+        return getStream.getMessages(userId);
+    }
 
+    @RequestMapping(value = "/conversation/{userId}/{conversationId}",method = RequestMethod.DELETE)
+    public AggregatedActivity<Message> getConversation(
+            @RequestParam long userId,
+            @RequestParam String conversationId) throws IOException, StreamClientException {
+        return getStream.getConversation(userId, conversationId);
+    }
+
+    
 
 
 }

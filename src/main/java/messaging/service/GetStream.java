@@ -5,6 +5,8 @@ import io.getstream.client.StreamClient;
 import io.getstream.client.config.ClientConfiguration;
 import io.getstream.client.config.StreamRegion;
 import io.getstream.client.exception.StreamClientException;
+import io.getstream.client.model.activities.AggregatedActivity;
+import io.getstream.client.model.beans.StreamResponse;
 import io.getstream.client.model.feeds.Feed;
 import io.getstream.client.service.AggregatedActivityServiceImpl;
 import messaging.domain.Message;
@@ -61,5 +63,21 @@ public class GetStream {
         AggregatedActivityServiceImpl<Message> aggregatedActivityService =  feed.newAggregatedActivityService(Message.class);
         message = aggregatedActivityService.addActivity(message);
         return message;
+    }
+
+
+    public StreamResponse<AggregatedActivity<Message>> getMessages(long userId) throws IOException, StreamClientException {
+        Feed feed = streamClient.newFeed("messages", String.valueOf(userId));
+        AggregatedActivityServiceImpl<Message> aggregatedActivityService =  feed.newAggregatedActivityService(Message.class);
+        return aggregatedActivityService.getActivities();
+    }
+
+    public AggregatedActivity<Message> getConversation(long userId,String conversationId) throws IOException, StreamClientException {
+       StreamResponse<AggregatedActivity<Message>> aggregatedActivityStreamResponse=getMessages(userId);
+       for(AggregatedActivity<Message> messageAggregatedActivity:aggregatedActivityStreamResponse.getResults()){
+           messageAggregatedActivity.getId().equals(conversationId);
+           return messageAggregatedActivity;
+       }
+       return null;
     }
 }
