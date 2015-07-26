@@ -40,44 +40,69 @@ public class GetStream {
         streamClient = new StreamClientImpl(streamConfig, apiKey, apiSecret);
     }
 
+    /**
+     * Sends a message to another user
+     *
+     * @param message
+     * @return
+     * @throws IOException
+     * @throws StreamClientException
+     */
     public Message sendMessage(Message message) throws IOException, StreamClientException {
-        ArrayList ids=new ArrayList();
+        ArrayList ids = new ArrayList();
         ids.add(String.valueOf(message.getToUser()));
         message.setTo(ids);
         message.setSentDate(new Date());
         message.setActor(String.valueOf(message.getFromUser()));
         message.setVerb(message.getFromUser() > message.getToUser() ?
-                "message" + message.getFromUser()+message.getToUser():
-                "message" + message.getToUser()+message.getFromUser());
-        return  postMessage(message);
+                "message" + message.getFromUser() + message.getToUser() :
+                "message" + message.getToUser() + message.getFromUser());
+        return postMessage(message);
     }
 
     /**
      * post Messages to GetStream
+     *
      * @return
      * @throws IOException
      * @throws StreamClientException
      */
     private Message postMessage(Message message) throws IOException, StreamClientException {
         Feed feed = streamClient.newFeed("messages", String.valueOf(message.getFromUser()));
-        AggregatedActivityServiceImpl<Message> aggregatedActivityService =  feed.newAggregatedActivityService(Message.class);
+        AggregatedActivityServiceImpl<Message> aggregatedActivityService = feed.newAggregatedActivityService(Message.class);
         message = aggregatedActivityService.addActivity(message);
         return message;
     }
 
-
+    /**
+     * Get the list of all conversations
+     *
+     * @param userId
+     * @return
+     * @throws IOException
+     * @throws StreamClientException
+     */
     public StreamResponse<AggregatedActivity<Message>> getMessages(long userId) throws IOException, StreamClientException {
         Feed feed = streamClient.newFeed("messages", String.valueOf(userId));
-        AggregatedActivityServiceImpl<Message> aggregatedActivityService =  feed.newAggregatedActivityService(Message.class);
+        AggregatedActivityServiceImpl<Message> aggregatedActivityService = feed.newAggregatedActivityService(Message.class);
         return aggregatedActivityService.getActivities();
     }
 
-    public AggregatedActivity<Message> getConversation(long userId,String conversationId) throws IOException, StreamClientException {
-       StreamResponse<AggregatedActivity<Message>> aggregatedActivityStreamResponse=getMessages(userId);
-       for(AggregatedActivity<Message> messageAggregatedActivity:aggregatedActivityStreamResponse.getResults()){
-           messageAggregatedActivity.getId().equals(conversationId);
-           return messageAggregatedActivity;
-       }
-       return null;
+    /**
+     * Get all messages in a conversation
+     *
+     * @param userId
+     * @param conversationId
+     * @return
+     * @throws IOException
+     * @throws StreamClientException
+     */
+    public AggregatedActivity<Message> getConversation(long userId, String conversationId) throws IOException, StreamClientException {
+        StreamResponse<AggregatedActivity<Message>> aggregatedActivityStreamResponse = getMessages(userId);
+        for (AggregatedActivity<Message> messageAggregatedActivity : aggregatedActivityStreamResponse.getResults()) {
+            messageAggregatedActivity.getId().equals(conversationId);
+            return messageAggregatedActivity;
+        }
+        return null;
     }
 }

@@ -27,26 +27,24 @@ public class MessagingController {
     @Autowired
     private MessageDao messageDao;
 
-    @RequestMapping(value = "/send",method = RequestMethod.POST)
+    @RequestMapping(value = "/send", method = RequestMethod.POST)
     public Message sendMessage(@RequestBody Message message) throws IOException, StreamClientException {
-        message=getStream.sendMessage(message);
-        message=messageDao.save(message);
+        message = getStream.sendMessage(message);
+        message = messageDao.save(message);
         return message;
     }
 
-    @RequestMapping(value = "/messages/{userId}",method = RequestMethod.POST)
+    @RequestMapping(value = "/messages/{userId}", method = RequestMethod.POST)
     public StreamResponse<AggregatedActivity<Message>> sendMessage(@RequestParam long userId) throws IOException, StreamClientException {
         return getStream.getMessages(userId);
     }
 
-    @RequestMapping(value = "/conversation/{userId}/{conversationId}",method = RequestMethod.DELETE)
+    @RequestMapping(value = "/conversation/{userId}/{conversationId}", method = RequestMethod.DELETE)
     public AggregatedActivity<Message> getConversation(
             @RequestParam long userId,
             @RequestParam String conversationId) throws IOException, StreamClientException {
         return getStream.getConversation(userId, conversationId);
     }
-
-    
 
 
 }

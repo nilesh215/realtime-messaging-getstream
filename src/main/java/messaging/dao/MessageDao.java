@@ -2,7 +2,6 @@ package messaging.dao;
 
 
 import messaging.domain.Message;
-import messaging.domain.User;
 import org.springframework.data.repository.CrudRepository;
 
 import javax.transaction.Transactional;
